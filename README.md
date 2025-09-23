@@ -1,5 +1,46 @@
 # React + TypeScript + Vite
 
+
+
+
+---
+
+## 📄 Frontend (`/TaskSaas.UI/README.md`)
+
+```markdown
+# TaskSaas Frontend
+
+TaskSaas is a **React + Vite** application that provides a clean UI for task and activity management.  
+It consumes the **TaskSaas API** for authentication and data handling.
+
+---
+
+## 🚀 Tech Stack
+- React + Vite
+- Tailwind CSS
+- Axios for API calls
+- React Router v6
+- JWT Authentication
+- Hosted on Vercel
+
+---
+
+## 📂 Features
+- User Registration & Login
+- Dashboard with task management
+- Activity log view
+- Responsive UI with Tailwind CSS
+- Integration with TaskSaas API
+
+---
+
+## ⚙️ Setup Instructions
+1. Install [Node.js](https://nodejs.org/)
+2. Install dependencies:
+   ```bash
+   npm install
+
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
