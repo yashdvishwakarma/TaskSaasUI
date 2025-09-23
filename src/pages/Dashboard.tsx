@@ -45,8 +45,8 @@ export default function Dashboard() {
   const load = async () => {
     try {
       setError("");
-      const { data } = await getTasks();
-      setTasks(data.data);
+      const  tasks  = await getTasks();
+      setTasks(tasks.data);
     } catch (err) {
       setError("Failed to load tasks");
     } finally {
@@ -116,7 +116,7 @@ export default function Dashboard() {
     try {
       // await updateTask(task.id, { ...task, title: editTitle });
       await updateTask({
-        title,
+        title ,
         status: 0,
         owner: user ? JSON.parse(user).id : null,
       });
