@@ -6,10 +6,8 @@ import { useEffect, useState } from "react";
 export default  function Profile() {
 
   
-  const user = localStorage.getItem("user");
-
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    // const [loading, setLoading] = useState(true);
+    // const [error, setError] = useState("");
     const localUser = localStorage.getItem("user");
     const parsedUser = localUser ? JSON.parse(localUser) : null;
 
@@ -17,14 +15,14 @@ export default  function Profile() {
 
   const loadProfile = async () => {
     try {
-      setError("");
+      // setError("");
       const res = await GetProfile({ UserId: parsedUser?.id });
       setProfile(res.data); // save API response
     } catch (err) {
       console.error(err);
-      setError("Failed to load Profile");
+      // setError("Failed to load Profile");
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

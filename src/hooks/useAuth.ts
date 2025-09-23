@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { login, register, type AuthResponse } from "../api/auth";
-import { roRO } from "@mui/material/locale";
 
 export function useAuth() {
   const [user, setUser] = useState<AuthResponse | null>(() => {

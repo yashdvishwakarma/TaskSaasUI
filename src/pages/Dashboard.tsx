@@ -116,7 +116,8 @@ export default function Dashboard() {
     try {
       // await updateTask(task.id, { ...task, title: editTitle });
       await updateTask({
-        title ,
+        TaskId : task.id,
+        Title : editTitle ? editTitle : task.title,
         status: 0,
         owner: user ? JSON.parse(user).id : null,
       });

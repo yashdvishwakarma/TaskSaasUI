@@ -18,8 +18,7 @@ import {
   Visibility,
   VisibilityOff,
   Email,
-  Lock,
-  Person,
+  Lock
 } from "@mui/icons-material";
 
 export default function Login() {
