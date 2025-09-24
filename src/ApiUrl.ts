@@ -1,3 +1,5 @@
+
+
 const ApiUrls = {
 loginUrls : {
 
@@ -8,7 +10,8 @@ Login : "/login",
 TaskUrls : {
  GetTasks : "/task/gettask",
  CreateTask : "/task/createtask",
- UpdateTask : "/task/Update"
+ UpdateTask : "/task/Update",
+ DeleteTask : "/task/delete"
 },
 
 UserUrls : 
