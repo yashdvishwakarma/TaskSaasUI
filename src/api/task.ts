@@ -11,7 +11,11 @@ export type TaskItem = {
   assigneeId?: number;
 };
 
-export const getTasks = () => http.get<TaskItem[]>(ApiUrls.TaskUrls.GetTasks);
+export const getTasks = () =>
+{
+  const response = http.get<TaskItem[]>(ApiUrls.TaskUrls.GetTasks);
+  return response;
+}
 export const createTask = (payload: {
   title: string;
   description?: string;

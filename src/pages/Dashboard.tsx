@@ -45,8 +45,8 @@ export default function Dashboard() {
   const load = async () => {
     try {
       setError("");
-      const  tasks  = await getTasks();
-      setTasks(tasks.data);
+      const  taskResult  = await getTasks();
+      setTasks(taskResult.data.data);
     } catch (err) {
       setError("Failed to load tasks");
     } finally {
@@ -136,6 +136,7 @@ export default function Dashboard() {
   useEffect(() => {
     load();
   }, []);
+  
 
   return (
     <Box
@@ -162,7 +163,11 @@ export default function Dashboard() {
             My Tasks
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            {tasks.filter(t => t.status !== 2).length} active, {tasks.filter(t => t.status === 2).length} completed
+            {Array.isArray(tasks)
+              ? `${tasks.filter((t) => t.status !== 2).length} active, ${
+                  tasks.filter((t) => t.status === 2).length
+                } completed`
+              : "Loading tasks..."}{" "}
           </Typography>
         </Box>
 
@@ -208,9 +213,7 @@ export default function Dashboard() {
                 },
               }}
               InputProps={{
-                startAdornment: (
-                  <Add sx={{ color: "grey.400", mr: 2 }} />
-                ),
+                startAdornment: <Add sx={{ color: "grey.400", mr: 2 }} />,
               }}
             />
             <Button
@@ -221,7 +224,8 @@ export default function Dashboard() {
                 minWidth: 100,
                 background: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%)",
+                  background:
+                    "linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%)",
                 },
               }}
             >
@@ -272,128 +276,173 @@ export default function Dashboard() {
           </Paper>
         ) : (
           <Stack spacing={2}>
-            {tasks.map((task) => (
-              <Fade in key={task.id}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: 2,
-                    border: "1px solid",
-                    borderColor: "grey.100",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      borderColor: "grey.200",
-                      transform: "translateY(-1px)",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-                    },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Stack direction="row" alignItems="center" spacing={2} flex={1}>
-                      <Checkbox
-                        checked={task.status === 2}
-                        onChange={() => toggleStatus(task)}
-                        sx={{
-                          color: "grey.400",
-                          "&.Mui-checked": {
-                            color: "success.main",
-                          },
-                        }}
-                      />
-                      
-                      {editingTask === task.id ? (
-                        <TextField
-                          fullWidth
-                          value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              saveEdit(task);
-                            }
-                          }}
-                          onBlur={() => saveEdit(task)}
-                          autoFocus
-                          variant="standard"
-                          sx={{
-                            "& .MuiInput-underline:before": {
-                              borderBottom: "1px solid #E5E7EB",
-                            },
-                          }}
-                        />
-                      ) : (
-                        <Box flex={1}>
-                          <Typography
-                            variant="body1"
+            {tasks && tasks.length > 0 ? (
+              <Stack spacing={2}>
+                {tasks.map((task) => (
+                  <Fade in key={task.id}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "grey.100",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          borderColor: "grey.200",
+                          transform: "translateY(-1px)",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                        },
+                      }}
+                    >
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={2}
+                          flex={1}
+                        >
+                          <Checkbox
+                            checked={task.status === 2}
+                            onChange={() => toggleStatus(task)}
                             sx={{
-                              textDecoration: task.status === 2 ? "line-through" : "none",
-                              color: task.status === 2 ? "text.disabled" : "text.primary",
-                              fontWeight: 500,
-                              cursor: "pointer",
+                              color: "grey.400",
+                              "&.Mui-checked": {
+                                color: "success.main",
+                              },
                             }}
-                            onClick={() => handleEdit(task)}
-                          >
-                            {task.title}
-                          </Typography>
-                          <Stack direction="row" spacing={1} mt={1}>
-                            <Typography variant="caption" color="text.secondary">
-                              #{task.id}
-                            </Typography>
-                            <Chip
-                              label={statusConfig[task.status as keyof typeof statusConfig].label}
-                              size="small"
+                          />
+
+                          {editingTask === task.id ? (
+                            <TextField
+                              fullWidth
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              onKeyPress={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  saveEdit(task);
+                                }
+                              }}
+                              onBlur={() => saveEdit(task)}
+                              autoFocus
+                              variant="standard"
                               sx={{
-                                backgroundColor: statusConfig[task.status as keyof typeof statusConfig].color,
-                                color: statusConfig[task.status as keyof typeof statusConfig].textColor,
-                                fontWeight: 500,
-                                fontSize: "0.75rem",
+                                "& .MuiInput-underline:before": {
+                                  borderBottom: "1px solid #E5E7EB",
+                                },
                               }}
                             />
+                          ) : (
+                            <Box flex={1}>
+                              <Typography
+                                variant="body1"
+                                sx={{
+                                  textDecoration:
+                                    task.status === 2 ? "line-through" : "none",
+                                  color:
+                                    task.status === 2
+                                      ? "text.disabled"
+                                      : "text.primary",
+                                  fontWeight: 500,
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => handleEdit(task)}
+                              >
+                                {task.Title || task.title || "Untitled Task"}{" "}
+                                {/* Handle both cases */}
+                              </Typography>
+                              <Stack direction="row" spacing={1} mt={1}>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  #{task.id}
+                                </Typography>
+                                <Chip
+                                  label={
+                                    statusConfig[
+                                      task.status as keyof typeof statusConfig
+                                    ]?.label || "Unknown"
+                                  }
+                                  size="small"
+                                  sx={{
+                                    backgroundColor:
+                                      statusConfig[
+                                        task.status as keyof typeof statusConfig
+                                      ]?.color || "#E5E7EB",
+                                    color:
+                                      statusConfig[
+                                        task.status as keyof typeof statusConfig
+                                      ]?.textColor || "#6B7280",
+                                    fontWeight: 500,
+                                    fontSize: "0.75rem",
+                                  }}
+                                />
+                              </Stack>
+                            </Box>
+                          )}
+                        </Stack>
+
+                        {!editingTask && (
+                          <IconButton
+                            onClick={(e) => {
+                              setAnchorEl(e.currentTarget);
+                              setSelectedTaskId(task.id);
+                            }}
+                            sx={{ color: "grey.400" }}
+                          >
+                            <MoreVert />
+                          </IconButton>
+                        )}
+
+                        {editingTask === task.id && (
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              size="small"
+                              onClick={() => saveEdit(task)}
+                              sx={{ minWidth: 60 }}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="small"
+                              onClick={cancelEdit}
+                              color="inherit"
+                              sx={{ minWidth: 60 }}
+                            >
+                              Cancel
+                            </Button>
                           </Stack>
-                        </Box>
-                      )}
-                    </Stack>
-
-                    {!editingTask && (
-                      <IconButton
-                        onClick={(e) => {
-                          setAnchorEl(e.currentTarget);
-                          setSelectedTaskId(task.id);
-                        }}
-                        sx={{ color: "grey.400" }}
-                      >
-                        <MoreVert />
-                      </IconButton>
-                    )}
-
-                    {editingTask === task.id && (
-                      <Stack direction="row" spacing={1}>
-                        <Button
-                          size="small"
-                          onClick={() => saveEdit(task)}
-                          sx={{ minWidth: 60 }}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          size="small"
-                          onClick={cancelEdit}
-                          color="inherit"
-                          sx={{ minWidth: 60 }}
-                        >
-                          Cancel
-                        </Button>
+                        )}
                       </Stack>
-                    )}
-                  </Stack>
-                </Paper>
-              </Fade>
-            ))}
+                    </Paper>
+                  </Fade>
+                ))}
+              </Stack>
+            ) : (
+              // Empty state
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 8,
+                  textAlign: "center",
+                  borderRadius: 3,
+                  backgroundColor: "grey.50",
+                }}
+              >
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No tasks yet
+                </Typography>
+                <Typography variant="body2" color="text.disabled">
+                  Add your first task to get started
+                </Typography>
+              </Paper>
+            )}
           </Stack>
         )}
 
@@ -412,7 +461,7 @@ export default function Dashboard() {
         >
           <MenuItem
             onClick={() => {
-              const task = tasks.find(t => t.id === selectedTaskId);
+              const task = tasks.find((t) => t.id === selectedTaskId);
               if (task) handleEdit(task);
             }}
             sx={{ gap: 1.5 }}
