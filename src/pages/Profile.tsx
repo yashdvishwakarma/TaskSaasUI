@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 export default  function Profile() {
 
-  
     // const [loading, setLoading] = useState(true);
     // const [error, setError] = useState("");
     const localUser = localStorage.getItem("user");
