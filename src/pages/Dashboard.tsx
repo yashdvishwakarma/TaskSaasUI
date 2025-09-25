@@ -1,6 +1,6 @@
 // src/pages/Dashboard.tsx
 import { useEffect, useState } from "react";
-import { getTasks, createTask, updateTask, deleteTask, type TaskItem } from "../api/task";
+import { createTask, updateTask, deleteTask, type TaskItem } from "../api/task";
 import {
   Box,
   Button,
@@ -23,6 +23,8 @@ import {
   Delete,
   Edit,
 } from "@mui/icons-material";
+import { taskApi } from "../api/taskApi";
+import { ApiException } from "../api/types";
 
 const statusConfig = {
   0: { label: "To do", color: "#E5E7EB", textColor: "#6B7280" },
@@ -41,18 +43,60 @@ export default function Dashboard() {
   const [editTitle, setEditTitle] = useState("");
 
   const user = localStorage.getItem("user");
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0
+  });
 
-  const load = async () => {
+  const loadTasks = async (page = 1) => {
     try {
-      setError("");
-      const  taskResult  = await getTasks();
-      setTasks(taskResult.data.data);
+      setLoading(true);
+      setError('');
+      
+      const result = await taskApi.getTasks({ 
+        page, 
+        limit: pagination.limit 
+      });
+      console.log("result", result.data);
+      setTasks(result.data);
+      setPagination({
+        page: result.page,
+        limit: result.limit,
+        total: result.total
+      });
     } catch (err) {
-      setError("Failed to load tasks");
+      if (err instanceof ApiException) {
+        // Handle specific API errors
+        switch (err.code) {
+          case 'UNAUTHORIZED':
+            setError('You are not authorized to view tasks. Please login.');
+            // Optionally redirect to login
+            break;
+          case 'NETWORK_ERROR':
+            setError('Network error. Please check your internet connection.');
+            break;
+          default:
+            setError(err.message || 'Failed to load tasks');
+        }
+        
+        // Log additional details for debugging
+        console.error('API Error:', {
+          code: err.code,
+          message: err.message,
+          details: err.details,
+          statusCode: err.statusCode
+        });
+      } else {
+        // Handle unexpected errors
+        setError('An unexpected error occurred');
+        console.error('Unexpected error:', err);
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +110,7 @@ export default function Dashboard() {
         Role : "User"
       });
       setTitle("");
-      await load();
+      await loadTasks();
     } catch (err) {
       setError("Failed to create task");
     }
@@ -81,7 +125,7 @@ export default function Dashboard() {
         status: nextStatus,
         owner: user ? JSON.parse(user).id : null,
       });
-      await load();
+      await loadTasks();
     } catch (err) {
       setError("Failed to update task");
     }
@@ -98,7 +142,7 @@ export default function Dashboard() {
            Role: "User",
          });
          setAnchorEl(null);
-      await load();
+      await loadTasks();
     } catch (err) {
       setError("Failed to delete task");
     }
@@ -122,7 +166,7 @@ export default function Dashboard() {
         owner: user ? JSON.parse(user).id : null,
       });
       setEditingTask(null);
-      await load();
+      await loadTasks();
     } catch (err) {
       setError("Failed to update task");
     }
@@ -134,7 +178,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    load();
+    loadTasks();
   }, []);
   
 
@@ -353,7 +397,7 @@ export default function Dashboard() {
                                 }}
                                 onClick={() => handleEdit(task)}
                               >
-                                {task.Title || task.title || "Untitled Task"}{" "}
+                                { task.title || "Untitled Task"}{" "}
                                 {/* Handle both cases */}
                               </Typography>
                               <Stack direction="row" spacing={1} mt={1}>

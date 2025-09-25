@@ -13,7 +13,7 @@ export type TaskItem = {
 
 export const getTasks = () =>
 {
-  const response = http.get<TaskItem[]>(ApiUrls.TaskUrls.GetTasks);
+    const response = http.get(ApiUrls.TaskUrls.GetTasks);
   return response;
 }
 export const createTask = (payload: {
@@ -33,7 +33,7 @@ export const deleteTask = (payload: {
   status: 0 | 1 | 2;
   owner: number;
     Role : "User" | "Admin";
-}) => http.post<TaskItem>(ApiUrls.TaskUrls.CreateTask, payload); 
+}) => http.post<TaskItem>(ApiUrls.TaskUrls.DeleteTask, payload); 
 
 export const updateTask = (payload: {
   TaskId : number;

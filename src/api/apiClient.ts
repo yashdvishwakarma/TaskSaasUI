@@ -1,24 +1,3 @@
-// import axios from "axios";
-
-
-// //https://tasksaas-api.onrender.com/api  
-// //https://localhost:7048/api
-// const http = axios.create({
-//   baseURL: "https://localhost:7048/api",
-//     timeout: import.meta.env.DEV ? 10000 : 1000000,
-// });
-
-// http.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("token");
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   });
-
-//   export default http;
-
 // api/apiClient.ts
 import axios, { AxiosError, type AxiosResponse } from 'axios';
 import { type ApiResponse, ApiException } from './types';
@@ -46,7 +25,6 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response: AxiosResponse<ApiResponse<any>>) => {
     // Handle successful response
-    
     return response;
   },
   (error: AxiosError<ApiResponse<any>>) => {
