@@ -1,7 +1,8 @@
 // src/components/Header.tsx
-import { AppBar, Toolbar, Typography, Button, Avatar, Box, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Logout } from "@mui/icons-material";
+import {  Logout } from "@mui/icons-material";
+import UserAvatar from "./UserAvtar";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -15,7 +16,6 @@ export default function Header() {
   };
 
   if (!userData) return null;
-
   return (
     <AppBar
       position="sticky"
@@ -41,7 +41,7 @@ export default function Header() {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton sx={{border:"none"}} onClick={() => navigate("/profile") }>
-            <Avatar
+            {/* <Avatar
               sx={{
                 bgcolor: "primary.main",
                 width: 36,
@@ -49,7 +49,15 @@ export default function Header() {
               }}
             >
               {userData.name?.charAt(0).toUpperCase()}
-            </Avatar>
+            </Avatar> */}
+            <UserAvatar name={userData.fullName} src=""
+             sx={{
+                bgcolor: "primary.main",
+                width: 38,
+                height: 38,
+                
+              }}
+               />
           </IconButton>
 
           <Button
