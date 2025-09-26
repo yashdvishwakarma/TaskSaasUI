@@ -7,11 +7,22 @@ export type TaskItem = {
   id: number;
   title: string;
   description?: string;
-  dueDate?: string;
+  dueDate?: Date;
   status: 0 | 1 | 2; // Todo | InProgress | Done
   ownerId: number;
   assigneeId?: number;
 };
+
+export type CreateTaskDto = 
+{
+  title: string;
+  description?: string;
+  dueDate?: Date;
+  status: 0 | 1 | 2;
+  owner: number;
+  assigneeId?: number | null;
+  assignessid_userid?: number;
+}
 
 export type TaskQueryParams = {
   

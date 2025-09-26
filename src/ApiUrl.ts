@@ -1,3 +1,5 @@
+
+
 const ApiUrls = {
   loginUrls: {
     Login: "/login",
@@ -14,5 +16,11 @@ const ApiUrls = {
   UserUrls: {
     GetProfile: "/user/me",
   },
+
+  ProfileUrls: {
+    GetProfile: "/User/me",
+    UpdateProfile: "/User/updateprofile",
+    ChangePassword: "/User/update-password",
+  }
 };
 export default ApiUrls;

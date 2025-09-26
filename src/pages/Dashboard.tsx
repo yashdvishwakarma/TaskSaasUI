@@ -59,7 +59,14 @@ export default function Dashboard() {
         limit: pagination.limit 
       });
       console.log("result", result.data);
-      setTasks(result.data);
+      setTasks(
+        result.data
+          ? result.data.map((task: any) => ({
+              ...task,
+              dueDate: task.dueDate ? task.dueDate.toISOString?.() ?? String(task.dueDate) : undefined,
+            }))
+          : []
+      );
       setPagination({
         page: result.page,
         limit: result.limit,

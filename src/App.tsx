@@ -14,6 +14,7 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import Profile from './pages/Profile';
+import AppErrorBoundary from './components/AppErrorBoundary';
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -27,33 +28,38 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <>
-                <Header />
-                <Dashboard />
-              </>
-            </ProtectedRoute>
-          }
-        />
-                <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <>
-                <Header />
-                <Profile />
-              </>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to={token ? "/dashboard" : "/login"} />} />
-      </Routes>
+      <AppErrorBoundary>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <Dashboard />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <Profile />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={<Navigate to={token ? "/dashboard" : "/login"} />}
+          />
+        </Routes>
+      </AppErrorBoundary>
     </ThemeProvider>
   );
 }
