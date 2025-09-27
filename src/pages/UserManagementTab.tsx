@@ -24,6 +24,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  colors,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -88,6 +89,7 @@ export default function UserManagementTab() {
   };
 
   const handleCreateUser = async () => {
+    
     try {
       setError('');
       
@@ -100,7 +102,7 @@ export default function UserManagementTab() {
         setError('Password must be at least 6 characters');
         return;
       }
-
+      
       await userApi.registerUser(formData);
       setSuccessMessage('User created successfully');
       setCreateDialogOpen(false);
@@ -274,7 +276,7 @@ export default function UserManagementTab() {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             margin="normal"
             required
-            helperText="Minimum 6 characters"
+            helperText="Minimum 6 characters"  
           />
           <FormControl fullWidth margin="normal">
             <InputLabel>Role</InputLabel>

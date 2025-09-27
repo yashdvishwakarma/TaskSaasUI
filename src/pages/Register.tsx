@@ -38,7 +38,7 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      await doRegister(fullName, email, password , "user");
+      await doRegister(fullName, email, password , "Admin");
       nav("/dashboard");
     } catch (err) {
       setError("Registration failed. Please try again.");

@@ -2,8 +2,8 @@
 
 const ApiUrls = {
   loginUrls: {
-    Login: "/login",
-    Register: "/register",
+    Login: "/auth/login",
+    Register: "/auth/register",
   },
 
   TaskUrls: {
