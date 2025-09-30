@@ -42,6 +42,7 @@ import { userApi } from '../api/User/userApi';
 import type { TaskItem, CreateTaskDto } from '../api/taskApi';
 import type { User }  from '../api/User/types';
 import { ApiException } from '../api/types';
+import dayjs, { Dayjs } from 'dayjs';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -65,6 +66,19 @@ export default function TaskAssignmentTab() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedEditTask, setSelectedEditTask] = useState<TaskItem>({
+    title: '',
+    description: '',
+    dueDate: new Date(),
+    assigneeId: 0,
+    status: 0,
+    ownerId: parsedUser?.id ?? 0,
+    id: 0,
+  });
+
+    const user = localStorage.getItem("user");
+    const userData = user ? JSON.parse(user) : null;
 
   // Form state
   const [formData, setFormData] = useState<CreateTaskDto>({
@@ -131,10 +145,40 @@ export default function TaskAssignmentTab() {
     }
   };
 
-  // Quick assign task
-  const handleQuickAssign = async (taskId: number, userId: number) => {
+    // Update task with assignment
+  const handleEditTask = async () => {
     try {
-      await taskApi.updateTask(taskId, { assigneeId: userId });
+      setError('');
+      
+      // Validation
+      if (!selectedEditTask.title.trim()) {
+        setError('Task title is required');
+        return;
+      }
+
+      await taskApi.updateTask({
+        ...selectedEditTask,
+        assigneeId: selectedEditTask.assigneeId === null ? undefined : selectedEditTask.assigneeId,
+      });
+      setSuccessMessage('Task Updated and assigned successfully');
+      setEditDialogOpen(false);
+      resetForm();
+      loadTasks();
+    } catch (err) {
+      if (err instanceof ApiException) {
+        setError(err.message || 'Failed to create task');
+      }
+    }
+  };
+
+  // Quick assign task
+  const handleQuickAssign = async (taskId: number, userId: number,task: TaskItem) => {
+    try {
+      task = {
+      ...task,
+      assigneeId: userId
+      }
+      await taskApi.updateTask(task);
       setSuccessMessage('Task assigned successfully');
       loadTasks();
     } catch (err) {
@@ -146,12 +190,21 @@ export default function TaskAssignmentTab() {
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       dueDate: new Date(),
       assigneeId: null,
       status: 0,
       owner: parsedUser?.id ?? 0,
+    });
+    setSelectedEditTask({
+      title: "",
+      description: "",
+      dueDate: new Date(),
+      assigneeId: 0,
+      status: 0,
+      ownerId: parsedUser?.id ?? 0,
+      id: 0,
     });
   };
 
@@ -160,8 +213,6 @@ export default function TaskAssignmentTab() {
     loadTasks();
   }, []);
 
-
-  console.log("loading",loading)
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -268,8 +319,8 @@ export default function TaskAssignmentTab() {
                     {task.assigneeId ? (
                       <Chip
                         label={
-                          users.find((u) => u.id === task.assigneeId)
-                            ?.fullName || "Unknown"
+                          userData.id == task.assigneeId ? userData.fullName : users.find((u) => u.id == task.assigneeId) ? 
+                            users.find((u) => u.id == task.assigneeId)?.fullName : ""
                         }
                         color="primary"
                         size="small"
@@ -284,13 +335,14 @@ export default function TaskAssignmentTab() {
                           <TextField {...params} placeholder="Assign to..." />
                         )}
                         onChange={(_, value) => {
-                          if (value) handleQuickAssign(task.id, value.id);
+                          if (value) handleQuickAssign(task.id, value.id,task);
                         }}
                       />
                     )}
                   </TableCell>
                   <TableCell>
-                    <IconButton size="small" color="primary">
+                    <IconButton size="small" color="primary"  onClick={() =>{setSelectedEditTask(task), setEditDialogOpen(true)} }>
+                
                       <EditIcon />
                     </IconButton>
                     <IconButton size="small" color="error">
@@ -399,6 +451,107 @@ export default function TaskAssignmentTab() {
               color="primary"
             >
               Create Task
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+
+        {/* Edit Task Dialog */}
+        <Dialog
+          open={editDialogOpen}
+          onClose={() => setCreateDialogOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Edit & Assign Task</DialogTitle>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="Task Title"
+              value={selectedEditTask?.title}
+              onChange={(e) =>
+                setSelectedEditTask({ ...selectedEditTask, title: e.target.value })
+              }
+              margin="normal"
+              required
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={selectedEditTask.description}
+              onChange={(e) =>
+                setSelectedEditTask({ ...selectedEditTask, description: e.target.value })
+              }
+              margin="normal"
+              multiline
+              rows={3}
+            />
+            <DatePicker
+              label="Due Date"   
+              value={dayjs(selectedEditTask.dueDate).toDate() ||  new date()}
+              onChange={(newDate) =>
+                setSelectedEditTask({ ...selectedEditTask, dueDate: newDate || new Date() })
+              }
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "normal",
+                  required: true,
+                },
+              }}
+            />
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel>Assign To</InputLabel>
+              <Select
+                value={selectedEditTask.assigneeId || ""}
+                onChange={(e) =>
+                  setSelectedEditTask({
+                    ...selectedEditTask,
+                    assigneeId: Number(e.target.value) || 0,
+                  })
+                }
+                label="Assign To"
+              >
+                <MenuItem value="">
+                  <em>Unassigned</em>
+                </MenuItem>
+                {users.map((user) => (
+                  <MenuItem key={user.id} value={user.id}>
+                    {user.fullName} ({user.email})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={formData.status}
+                onChange={(e) =>
+                  setSelectedEditTask({ ...selectedEditTask, status: e.target.value })
+                }
+                label="Status"
+              >
+                <MenuItem value={0}>Pending</MenuItem>
+                <MenuItem value={1}>In Progress</MenuItem>
+                <MenuItem value={2}>Completed</MenuItem>
+              </Select>
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setEditDialogOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditTask}
+              variant="contained"
+              color="primary"
+            >
+              Save
             </Button>
           </DialogActions>
         </Dialog>

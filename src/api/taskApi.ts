@@ -8,7 +8,7 @@ export type TaskItem = {
   title: string;
   description?: string;
   dueDate?: Date;
-  status: 0 | 1 | 2; // Todo | InProgress | Done
+  status: number; // Todo | InProgress | Done
   ownerId: number;
   assigneeId?: number;
 };
@@ -40,8 +40,8 @@ export const taskApi = {
   createTask: (task: Partial<TaskItem>) => 
     apiService.post<TaskItem>(ApiUrls.TaskUrls.CreateTask, task),
 
-  updateTask: (id: number, task: Partial<TaskItem>) => 
-    apiService.put<TaskItem>(`${ApiUrls.TaskUrls.UpdateTask}/${id}`, task),
+  updateTask: ( task: Partial<TaskItem>) => 
+    apiService.post<TaskItem>(`${ApiUrls.TaskUrls.UpdateTask}`, task),
 
   deleteTask: (id: number) => 
     apiService.delete<void>(`${ApiUrls.TaskUrls.DeleteTask}/${id}`),
