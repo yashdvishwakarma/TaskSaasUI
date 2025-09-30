@@ -42,7 +42,7 @@ import { userApi } from '../api/User/userApi';
 import type { TaskItem, CreateTaskDto } from '../api/taskApi';
 import type { User }  from '../api/User/types';
 import { ApiException } from '../api/types';
-import dayjs from 'dayjs';
+import { parseISO } from 'date-fns'
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -230,7 +230,7 @@ export default function TaskAssignmentTab() {
 
         {/* Summary Cards */}
         <Grid container spacing={3} mb={3}>
-          <Grid sx={{  "xs":12, "sm":4}}>
+          <Grid sx={{ xs: 12, sm: 4 }}>
             <Item>
               <Card>
                 <CardContent>
@@ -240,32 +240,32 @@ export default function TaskAssignmentTab() {
                   <Typography variant="h4">{tasks.length}</Typography>
                 </CardContent>
               </Card>
-              </Item>
-          </Grid>
-          <Grid sx={{  "xs":12, "sm":4}}>
-                   <Item>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Assigned Tasks
-                </Typography>
-                <Typography variant="h4">
-                  {tasks.filter((t) => t.assigneeId).length}
-                </Typography>
-              </CardContent>
-            </Card>
             </Item>
           </Grid>
-          <Grid sx={{  "xs":12, "sm":4}}>
+          <Grid sx={{ xs: 12, sm: 4 }}>
             <Item>
-            <Card>
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  Team Members
-                </Typography>
-                <Typography variant="h4">{users.length}</Typography>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>
+                    Assigned Tasks
+                  </Typography>
+                  <Typography variant="h4">
+                    {tasks.filter((t) => t.assigneeId).length}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Item>
+          </Grid>
+          <Grid sx={{ xs: 12, sm: 4 }}>
+            <Item>
+              <Card>
+                <CardContent>
+                  <Typography color="textSecondary" gutterBottom>
+                    Team Members
+                  </Typography>
+                  <Typography variant="h4">{users.length}</Typography>
+                </CardContent>
+              </Card>
             </Item>
           </Grid>
         </Grid>
@@ -313,14 +313,22 @@ export default function TaskAssignmentTab() {
                     />
                   </TableCell>
                   <TableCell>
-                    {new Date(task.dueDate ? task.dueDate.toString() : Date.UTC.toString()).toLocaleDateString()}
+                    {new Date(
+                      task.dueDate
+                        ? task.dueDate.toString()
+                        : Date.UTC.toString()
+                    ).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     {task.assigneeId ? (
                       <Chip
                         label={
-                          userData.id == task.assigneeId ? userData.fullName : users.find((u) => u.id == task.assigneeId) ? 
-                            users.find((u) => u.id == task.assigneeId)?.fullName : ""
+                          userData.id == task.assigneeId
+                            ? userData.fullName
+                            : users.find((u) => u.id == task.assigneeId)
+                            ? users.find((u) => u.id == task.assigneeId)
+                                ?.fullName
+                            : ""
                         }
                         color="primary"
                         size="small"
@@ -335,14 +343,19 @@ export default function TaskAssignmentTab() {
                           <TextField {...params} placeholder="Assign to..." />
                         )}
                         onChange={(_, value) => {
-                          if (value) handleQuickAssign(task.id, value.id,task);
+                          if (value) handleQuickAssign(task.id, value.id, task);
                         }}
                       />
                     )}
                   </TableCell>
                   <TableCell>
-                    <IconButton size="small" color="primary"  onClick={() =>{setSelectedEditTask(task), setEditDialogOpen(true)} }>
-                
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        setSelectedEditTask(task), setEditDialogOpen(true);
+                      }}
+                    >
                       <EditIcon />
                     </IconButton>
                     <IconButton size="small" color="error">
@@ -455,7 +468,6 @@ export default function TaskAssignmentTab() {
           </DialogActions>
         </Dialog>
 
-
         {/* Edit Task Dialog */}
         <Dialog
           open={editDialogOpen}
@@ -470,7 +482,10 @@ export default function TaskAssignmentTab() {
               label="Task Title"
               value={selectedEditTask?.title}
               onChange={(e) =>
-                setSelectedEditTask({ ...selectedEditTask, title: e.target.value })
+                setSelectedEditTask({
+                  ...selectedEditTask,
+                  title: e.target.value,
+                })
               }
               margin="normal"
               required
@@ -480,17 +495,27 @@ export default function TaskAssignmentTab() {
               label="Description"
               value={selectedEditTask.description}
               onChange={(e) =>
-                setSelectedEditTask({ ...selectedEditTask, description: e.target.value })
+                setSelectedEditTask({
+                  ...selectedEditTask,
+                  description: e.target.value,
+                })
               }
               margin="normal"
               multiline
               rows={3}
             />
             <DatePicker
-              label="Due Date"   
-              value={dayjs(selectedEditTask.dueDate).toDate() ||  new Date()}
+              label="Due Date"
+              value={
+                selectedEditTask.dueDate
+                  ? parseISO(String(selectedEditTask.dueDate))
+                  : new Date()
+              }
               onChange={(newDate) =>
-                setSelectedEditTask({ ...selectedEditTask, dueDate: newDate || new Date() })
+                setSelectedEditTask({
+                  ...selectedEditTask,
+                  dueDate: newDate || new Date(),
+                })
               }
               slotProps={{
                 textField: {
@@ -527,7 +552,10 @@ export default function TaskAssignmentTab() {
               <Select
                 value={formData.status}
                 onChange={(e) =>
-                  setSelectedEditTask({ ...selectedEditTask, status: e.target.value })
+                  setSelectedEditTask({
+                    ...selectedEditTask,
+                    status: e.target.value,
+                  })
                 }
                 label="Status"
               >
