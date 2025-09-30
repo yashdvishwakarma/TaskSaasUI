@@ -42,7 +42,7 @@ import { userApi } from '../api/User/userApi';
 import type { TaskItem, CreateTaskDto } from '../api/taskApi';
 import type { User }  from '../api/User/types';
 import { ApiException } from '../api/types';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
