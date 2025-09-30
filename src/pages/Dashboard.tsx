@@ -33,6 +33,8 @@ const statusConfig = {
 };
 
 export default function Dashboard() {
+    const localUser = localStorage.getItem('user');
+    const parsedUser = localUser ? JSON.parse(localUser) : null;
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,15 @@ export default function Dashboard() {
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [editingTask, setEditingTask] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [selectedEditTask, setSelectedEditTask] = useState<TaskItem>({
+    title: "",
+    description: "",
+    dueDate: new Date(),
+    assigneeId: 0,
+    status: 0,
+    ownerId: parsedUser?.id ?? 0,
+    id: 0,
+  });
 
   const user = localStorage.getItem("user");
   const [pagination, setPagination] = useState({
@@ -155,6 +166,7 @@ export default function Dashboard() {
     }
   };
 
+
   const handleEdit = (task: TaskItem) => {
     setEditingTask(task.id);
     setEditTitle(task.title);
@@ -163,14 +175,13 @@ export default function Dashboard() {
 
   const saveEdit = async (task: TaskItem) => {
     if (!editTitle.trim()) return;
-    
+  
     try {
       // await updateTask(task.id, { ...task, title: editTitle });
-      await updateTask({
-        TaskId : task.id,
-        Title : editTitle ? editTitle : task.title,
-        status: 0,
-        owner: user ? JSON.parse(user).id : null,
+       await taskApi.updateTask({
+        ...task,
+        assigneeId: task.assigneeId === null ? undefined : task.assigneeId,
+        title: editTitle
       });
       setEditingTask(null);
       await loadTasks();
@@ -373,7 +384,7 @@ export default function Dashboard() {
                               fullWidth
                               value={editTitle}
                               onChange={(e) => setEditTitle(e.target.value)}
-                              onKeyPress={(e) => {
+                              onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
                                   saveEdit(task);

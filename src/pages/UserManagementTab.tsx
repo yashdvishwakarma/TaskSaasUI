@@ -156,12 +156,23 @@ export default function UserManagementTab() {
 
   return (
     <Box>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       {successMessage && (
-        <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {successMessage}
+        </Alert>
       )}
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={3}
+      >
         <Typography variant="h6">Organization Users</Typography>
         <Button
           variant="contained"
@@ -192,25 +203,29 @@ export default function UserManagementTab() {
                 <TableCell>
                   <Chip
                     label={
-                      user.role === AppConstants.UserRoles.Admin
-                        ? 'Admin'
-                        : user.role === AppConstants.UserRoles.User
-                        ? 'User'
-                        : 'Guest'
+                      user.role == AppConstants.UserRoles.Admin
+                        ? "Admin"
+                        : user.role == AppConstants.UserRoles.User
+                        ? "User"
+                        : "Guest"
                     }
                     color={
-                      user.role === AppConstants.UserRoles.Admin
-                        ? 'error'
-                        : 'primary'
+                      user.role == AppConstants.UserRoles.Admin
+                        ? "error"
+                        : "primary"
                     }
                     size="small"
                   />
                 </TableCell>
                 <TableCell>
                   <Chip
-                    icon={user.isActive ? <ActiveIcon /> : <BlockIcon />}
-                    label={user.isActive ? 'Active' : 'Inactive'}
-                    color={user.isActive ? 'success' : 'default'}
+                  //keeing the status active by default for now
+                    icon={ <ActiveIcon />}
+                    label={"Active"}
+                    color={ "success"}
+                    // icon={user.isActive ? <ActiveIcon /> : <BlockIcon />}
+                    // label={user.isActive ? 'Active' : 'Inactive'}
+                    // color={user.isActive ? 'success' : 'default'}
                     size="small"
                   />
                 </TableCell>
@@ -220,7 +235,9 @@ export default function UserManagementTab() {
                 <TableCell>
                   <Switch
                     checked={user.isActive}
-                    onChange={() => handleToggleUserStatus(user.id, user.isActive)}
+                    onChange={() =>
+                      handleToggleUserStatus(user.id, user.isActive)
+                    }
                     disabled={user.id === parsedUser?.id} // Can't disable self
                   />
                 </TableCell>
@@ -255,7 +272,9 @@ export default function UserManagementTab() {
             fullWidth
             label="Full Name"
             value={formData.fullName}
-            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, fullName: e.target.value })
+            }
             margin="normal"
             required
           />
@@ -264,7 +283,9 @@ export default function UserManagementTab() {
             label="Email"
             type="email"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
             margin="normal"
             required
           />
@@ -273,16 +294,20 @@ export default function UserManagementTab() {
             label="Password"
             type="password"
             value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
             margin="normal"
             required
-            helperText="Minimum 6 characters"  
+            helperText="Minimum 6 characters"
           />
           <FormControl fullWidth margin="normal">
             <InputLabel>Role</InputLabel>
             <Select
               value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, role: e.target.value })
+              }
               label="Role"
             >
               <MenuItem value={AppConstants.UserRoles.User}>User</MenuItem>
@@ -291,15 +316,17 @@ export default function UserManagementTab() {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setCreateDialogOpen(false);
-            resetForm();
-          }}>
+          <Button
+            onClick={() => {
+              setCreateDialogOpen(false);
+              resetForm();
+            }}
+          >
             Cancel
           </Button>
-          <Button 
-            onClick={handleCreateUser} 
-            variant="contained" 
+          <Button
+            onClick={handleCreateUser}
+            variant="contained"
             color="primary"
           >
             Create User

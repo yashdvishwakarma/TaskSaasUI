@@ -7,7 +7,7 @@ import type { User } from './types';
 export const userApi = {
 
   getUsers : (params?: any) => 
-    apiService.get<PaginatedResult<User>>(ApiUrls.TaskUrls.GetTasks, params),
+    apiService.post<PaginatedResult<User>>(ApiUrls.UserUrls.GetUserList, params),
 
   registerUser : (data : any) => 
     apiService.post<any>(ApiUrls.loginUrls.Register, data)
