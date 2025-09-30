@@ -488,7 +488,7 @@ export default function TaskAssignmentTab() {
             />
             <DatePicker
               label="Due Date"   
-              value={dayjs(selectedEditTask.dueDate).toDate() ||  new date()}
+              value={dayjs(selectedEditTask.dueDate).toDate() ||  new Date()}
               onChange={(newDate) =>
                 setSelectedEditTask({ ...selectedEditTask, dueDate: newDate || new Date() })
               }
