@@ -1,6 +1,6 @@
 // src/pages/Dashboard.tsx
 import { useEffect, useState } from "react";
-import { createTask, updateTask, deleteTask, type TaskItem } from "../api/task";
+import { createTask, deleteTask, type TaskItem } from "../api/task";
 import {
   Box,
   Button,
@@ -135,13 +135,12 @@ export default function Dashboard() {
   };
 
   const toggleStatus = async (task: TaskItem) => {
-    const nextStatus = task.status === 2 ? 0 : task.status + 1;
+    const nextStatus:number = task.status === 2 ? 0 : task.status + 1;
     try {
-      await updateTask({
-        TaskId: task.id,
-        Title: task.title,
+           await taskApi.updateTask({
+        ...task,
         status: nextStatus,
-        owner: user ? JSON.parse(user).id : null,
+        assigneeId: task.assigneeId === null ? undefined : task.assigneeId,
       });
       await loadTasks();
     } catch (err) {

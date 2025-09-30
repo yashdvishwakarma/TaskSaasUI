@@ -8,7 +8,7 @@ export type TaskItem = {
   title: string;
   description?: string;
   dueDate?: Date;
-  status: 0 | 1 | 2; // Todo | InProgress | Done
+  status: number; // Todo | InProgress | Done
   ownerId: number;
   assigneeId?: number;
 };
