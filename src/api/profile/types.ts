@@ -3,7 +3,7 @@ export type UserProfile = {
   id: number;
   fullName: string;
   email: string;
-  role: string;
+  role: number | null;
 };
 
 export type UpdateProfileDto = {

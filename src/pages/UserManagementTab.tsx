@@ -57,7 +57,7 @@ export default function UserManagementTab() {
     fullName: '',
     email: '',
     password: '',
-    role: "99",
+    role: null,
     organizationId: parsedUser?.organizationId,
     id : 1,
     createdAt : '',
@@ -121,9 +121,13 @@ export default function UserManagementTab() {
       UserId : parsedUser?.id,
     });
 
-  const handleToggleUserStatus = async (userId: number, currentStatus: boolean) => {
+  const handleToggleUserStatus = async (userId: number, currentStatus: boolean, userDetail : User ) => {
     try {
-      await profileApi.updateProfile(userId, { ...editForm});
+      userDetail = {
+        ...userDetail,
+        isActive: !currentStatus
+      }
+      await profileApi.updateProfile(userId, { ...userDetail});
       setSuccessMessage('User status updated successfully');
       loadUsers();
     } catch (err) {
@@ -138,7 +142,7 @@ export default function UserManagementTab() {
     fullName: '',
     email: '',
     password: '',
-    role: "99",
+    role: null,
     organizationId: parsedUser?.organizationId,
     id : 1,
     createdAt : '',
@@ -220,12 +224,12 @@ export default function UserManagementTab() {
                 <TableCell>
                   <Chip
                   //keeing the status active by default for now
-                    icon={ <ActiveIcon />}
-                    label={"Active"}
-                    color={ "success"}
-                    // icon={user.isActive ? <ActiveIcon /> : <BlockIcon />}
-                    // label={user.isActive ? 'Active' : 'Inactive'}
-                    // color={user.isActive ? 'success' : 'default'}
+                    // icon={ <ActiveIcon />}
+                    // label={"Active"}
+                    // color={ "success"}
+                    icon={user.isActive ? <ActiveIcon /> : <BlockIcon />}
+                    label={user.isActive ? 'Active' : 'Inactive'}
+                    color={user.isActive ? 'success' : 'default'}
                     size="small"
                   />
                 </TableCell>
@@ -236,7 +240,7 @@ export default function UserManagementTab() {
                   <Switch
                     checked={user.isActive}
                     onChange={() =>
-                      handleToggleUserStatus(user.id, user.isActive)
+                      handleToggleUserStatus(user.id, user.isActive,user)
                     }
                     disabled={user.id === parsedUser?.id} // Can't disable self
                   />

@@ -50,7 +50,10 @@ export default function Header() {
             >
               {userData.name?.charAt(0).toUpperCase()}
             </Avatar> */}
-            <UserAvatar name={userData.fullName} src=""
+            {userData.fullName ? 
+            (
+              <>
+                   <UserAvatar name={userData.fullName} src=""
              sx={{
                 bgcolor: "primary.main",
                 width: 38,
@@ -58,6 +61,12 @@ export default function Header() {
                 
               }}
                />
+              </>
+            ): (
+              <>
+              </>
+            )}
+       
           </IconButton>
 
           <Button
