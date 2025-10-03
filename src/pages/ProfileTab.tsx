@@ -82,6 +82,7 @@ import { profileApi } from '../api/profile/profileApi';
 import type { UserProfile, UpdateProfileDto, ChangePasswordDto } from '../api/profile/types';
 import { ApiException } from '../api/types';
 import AppConstants from '../api/AppConstants';
+import { User } from '../api/User/types';
 
 export default function ProfileTab() {
   const localUser = localStorage.getItem('user');
@@ -96,10 +97,19 @@ export default function ProfileTab() {
   const [successMessage, setSuccessMessage] = useState('');
   
   // Edit form state
-  const [editForm, setEditForm] = useState<UpdateProfileDto>({
+  const [editForm, setEditForm] = useState<User>({
+    id: parsedUser?.id,
     fullName: '',
     email: '',
-    UserId : parsedUser?.id,
+    role: null,
+    createdAt: '',
+    updatedAt: '',
+    activityLog: '',
+    password: '',
+    idTask_AssigneeId : '',
+    idTask_OwnerId : '',
+    organizationId : 0,
+    isActive: true,
   });
   
   // Password dialog state
@@ -125,9 +135,10 @@ export default function ProfileTab() {
       const response = await profileApi.getProfile(parsedUser?.id);
       setProfile(response);
       setEditForm({
+        ...editForm,
         fullName: response.fullName,
         email: response.email,
-        UserId : parsedUser?.id
+        id : parsedUser?.id
       });
     } catch (err) {
       if (err instanceof ApiException) {
@@ -157,7 +168,7 @@ export default function ProfileTab() {
         return;
       }
 
-      const response = await profileApi.updateProfile(parsedUser?.id, editForm);
+      const response = await profileApi.updateProfile( editForm);
       loadProfile();
       setIsEditing(false);
       setSuccessMessage('Profile updated successfully');
@@ -222,9 +233,10 @@ export default function ProfileTab() {
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditForm({
+      ...editForm,
       fullName: profile?.fullName || '',
       email: profile?.email || '',
-      UserId : parsedUser?.id
+      id : parsedUser?.id
     });
     setError('');
   };

@@ -127,7 +127,7 @@ export default function UserManagementTab() {
         ...userDetail,
         isActive: !currentStatus
       }
-      await profileApi.updateProfile(userId, { ...userDetail});
+      await profileApi.updateProfile( { ...userDetail});
       setSuccessMessage('User status updated successfully');
       loadUsers();
     } catch (err) {

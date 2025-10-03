@@ -8,7 +8,7 @@ export const profileApi = {
   getProfile: (userId: number): Promise<UserProfile> =>
     apiService.post<UserProfile>(`${ApiUrls.ProfileUrls.GetProfile}`, { userId }),
 
-  updateProfile: (userId: number, data: User): Promise<UserProfile> =>
+  updateProfile: ( data: User): Promise<UserProfile> =>
     apiService.put<UserProfile>(ApiUrls.ProfileUrls.UpdateProfile, data),
 
   changePassword: (data: ChangePasswordDto): Promise<void> =>
