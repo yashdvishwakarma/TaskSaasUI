@@ -9,9 +9,9 @@ export function useAuth() {
 
   const doLogin = async (email: string, password: string) => {
     const { data } = await login(email, password);
-    localStorage.setItem("token", data.token);
+    localStorage.setItem("token", data.data.token );
     localStorage.setItem("user", JSON.stringify(data));
-    setUser(data);
+    setUser(data.data);
   };
 
   const doRegister = async (fullName: string, email: string, password: string , Role : string) => {

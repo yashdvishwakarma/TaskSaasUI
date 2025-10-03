@@ -5,7 +5,7 @@ export type TaskItem = {
   id: number;
   title: string;
   description?: string;
-  dueDate?: string;
+  dueDate?: Date;
   status: 0 | 1 | 2; // Todo | InProgress | Done
   ownerId: number;
   assigneeId?: number;
@@ -35,14 +35,11 @@ export const deleteTask = (payload: {
     Role : "User" | "Admin";
 }) => http.post<TaskItem>(ApiUrls.TaskUrls.DeleteTask, payload); 
 
-export const updateTask = (payload: {
-  TaskId : number;
-  Title: string;
-  Description?: string;
-  DueDate?: string;
-  status: number;
-  owner: number;
-}) => http.post<TaskItem>(ApiUrls.TaskUrls.UpdateTask, payload); 
+
+//moved to common component taskApis
+// export const updateTask = (payload: {
+//   task
+// }) => http.post<TaskItem>(ApiUrls.TaskUrls.UpdateTask, payload); 
 
 export const GetProfile = (payload: {
   UserId : number; 

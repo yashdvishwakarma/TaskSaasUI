@@ -69,7 +69,6 @@ export default function Dashboard() {
         page, 
         limit: pagination.limit 
       });
-      console.log("result", result.data);
       setTasks(
         result.data
           ? result.data.map((task: any) => ({
