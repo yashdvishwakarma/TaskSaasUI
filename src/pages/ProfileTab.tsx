@@ -86,7 +86,7 @@ import { User } from '../api/User/types';
 
 export default function ProfileTab() {
   const localUser = localStorage.getItem('user');
-  const parsedUser = localUser ? JSON.parse(localUser) : null;
+  const parsedUser = localUser ? JSON.parse(localUser).data : null;
 
   // State management
   const [profile, setProfile] = useState<UserProfile | null>(null);
