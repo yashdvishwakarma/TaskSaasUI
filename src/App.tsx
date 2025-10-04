@@ -7,7 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Header from './components/Header';
-
+import TaskStatusChart from './pages/TaskStatusChart';
 // Add Google Font
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
@@ -39,6 +39,17 @@ function App() {
                 <>
                   <Header />
                   <Dashboard />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/charts"
+            element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <TaskStatusChart />
                 </>
               </ProtectedRoute>
             }
