@@ -6,6 +6,11 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  CartesianGrid,
+  Line,
+  LineChart,
+  XAxis,
+  YAxis,
 } from "recharts";
 import {
   Box,
@@ -43,11 +48,17 @@ interface ChartData {
   percentage: number;
 }
 
+interface chartDataByDate {
+    date: string;
+    count: unknown;
+}[]
+
 export default function TaskStatusChart() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [timeFilter, setTimeFilter] = useState<string>("all");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [tasksByDate, setTasksByDate] = useState<chartDataByDate[]>([]);
 
   useEffect(() => {
     loadChartData();
@@ -62,6 +73,35 @@ export default function TaskStatusChart() {
 
       if (response && Array.isArray(response?.data)) {
         setTasks(response.data);
+
+
+      const tasksByDate = response.data.reduce((acc : any, task : any) => {
+        // Parse createdAt safely
+        const created = task.dueDate ? new Date(task.dueDate) : null;
+
+        // Skip invalid or placeholder dates
+        if (
+          !created ||
+          isNaN(created.getTime()) ||
+          created.getFullYear() === 1
+        ) {
+          return acc;
+        }
+
+        const dateKey = created.toLocaleDateString("en-CA"); // e.g. "2025-10-07"
+        acc[dateKey] = (acc[dateKey] || 0) + 1;
+
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(tasksByDate).map(([date, count]) => ({
+        date,
+        count,
+      }));
+
+      setTasksByDate(chartData)
+
+        console.log("Tasks by date:", chartData);
       } else {
         setTasks([]);
       }
@@ -257,7 +297,7 @@ export default function TaskStatusChart() {
       </Box>
 
       {/* Pie Chart */}
-      <Box sx={{ width: "100%", height: 350 }}>
+      <Box sx={{ width: "100%", height: 350, mb: 7 }}>
         <ResponsiveContainer>
           <PieChart>
             <Pie
@@ -291,6 +331,17 @@ export default function TaskStatusChart() {
               )}
             />
           </PieChart>
+        </ResponsiveContainer>
+      </Box>
+      <Box sx={{ width: "100%", height: 350 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={tasksByDate}>
+            <XAxis dataKey="date"  />
+            <YAxis />
+            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Line type="monotone" dataKey="count" stroke="#8884d8" />
+          </LineChart>
         </ResponsiveContainer>
       </Box>
     </Paper>

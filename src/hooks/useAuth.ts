@@ -14,7 +14,7 @@ export function useAuth() {
     setUser(data.data);
   };
 
-  const doRegister = async (fullName: string, email: string, password: string , Role : string) => {
+  const doRegister = async (fullName: string, email: string, password: string , Role : int) => {
     const { data } = await register(fullName, email, password, Role);
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data));

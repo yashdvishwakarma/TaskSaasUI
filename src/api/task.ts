@@ -9,6 +9,8 @@ export type TaskItem = {
   status: 0 | 1 | 2; // Todo | InProgress | Done
   ownerId: number;
   assigneeId?: number;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export const getTasks = () =>

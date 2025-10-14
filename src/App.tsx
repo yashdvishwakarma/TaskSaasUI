@@ -15,17 +15,29 @@ import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import Profile from './pages/Profile';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import OrganizationManagement from './pages/Organization/OrganizationManagement';
+import AppConstants from './api/AppConstants';
 
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
 // Protected Route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const token = localStorage.getItem('token');
   return token ? <>{children}</> : <Navigate to="/login" />;
 };
+    const localUser = localStorage.getItem('user');
+  const parsedUser = localUser ? JSON.parse(localUser).data : null;
+  const isAdmin = parsedUser?.role === AppConstants.UserRolesString.Admin;
 
 function App() {
+
   const token = localStorage.getItem('token');
 
   return (
+    <>
+
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AppErrorBoundary>
@@ -65,13 +77,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+            <Route  
+              path="/organizations"
+              element={
+                <ProtectedRoute>
+                               <Header />
+                  <OrganizationManagement />
+                </ProtectedRoute>
+              }
+            />
           <Route
-            path="/"
+            path="/"  
             element={<Navigate to={token ? "/dashboard" : "/login"} />}
           />
         </Routes>
       </AppErrorBoundary>
     </ThemeProvider>
+        </>
   );
 }
 

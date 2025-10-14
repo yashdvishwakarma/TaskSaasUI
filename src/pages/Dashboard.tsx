@@ -36,6 +36,7 @@ export default function Dashboard() {
     const localUser = localStorage.getItem('user');
     const parsedUser = localUser ? JSON.parse(localUser) : null;
   const [tasks, setTasks] = useState<TaskItem[]>([]);
+
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -77,11 +78,15 @@ export default function Dashboard() {
             }))
           : []
       );
+
+
+
       setPagination({
         page: result.page,
         limit: result.limit,
         total: result.total
       });
+
     } catch (err) {
       if (err instanceof ApiException) {
         // Handle specific API errors
@@ -194,6 +199,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    console.log("use effect");
     loadTasks();
   }, []);
   
