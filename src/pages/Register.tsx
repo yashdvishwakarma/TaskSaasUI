@@ -21,6 +21,7 @@ import {
   Person,
 } from "@mui/icons-material";
 import {theme } from "../theme/theme";
+import AppConstatns from "../api/AppConstants";
 
 
 export default function Register() {
@@ -38,7 +39,7 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      await doRegister(fullName, email, password , "Admin");
+      await doRegister(fullName, email, password ,AppConstatns.UserRoles.Admin);
       nav("/dashboard");
     } catch (err) {
       setError("Registration failed. Please try again.");
