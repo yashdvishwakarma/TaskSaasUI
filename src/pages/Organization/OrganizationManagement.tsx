@@ -132,6 +132,7 @@ const OrganizationManagement: React.FC = () => {
     if (!selectedOrg) return;
 
     try {
+      data = {...data, id : selectedOrg.id};
       await orgApi.updateOrganization(selectedOrg.id, data);
       setEditModalOpen(false);
       setSelectedOrg(null);
@@ -447,7 +448,8 @@ const OrganizationManagement: React.FC = () => {
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Delete organization" arrow>
+                          
+                          {/*<Tooltip title="Delete organization" arrow>
                             <IconButton
                               size="small"
                               onClick={() => openDeleteDialog(org)}
@@ -463,7 +465,7 @@ const OrganizationManagement: React.FC = () => {
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
+                          </Tooltip> */}
                         </Stack>
                       </TableCell>
                     </TableRow>

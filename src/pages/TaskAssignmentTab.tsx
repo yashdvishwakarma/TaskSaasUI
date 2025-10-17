@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogActions,
   styled,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -213,6 +214,14 @@ export default function TaskAssignmentTab() {
     loadTasks();
   }, []);
 
+
+    if (loading) {
+      return (
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      );
+    }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>

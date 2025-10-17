@@ -10,5 +10,9 @@ export const userApi = {
     apiService.post<PaginatedResult<User>>(ApiUrls.UserUrls.GetUserList, params),
 
   registerUser : (data : any) => 
-    apiService.post<any>(ApiUrls.loginUrls.Register, data)
+    apiService.post<any>(ApiUrls.loginUrls.Register, data),
+
+  createUser : (data : any) => 
+    apiService.post<any>(ApiUrls.UserUrls.createUer, data)
+  
 }
