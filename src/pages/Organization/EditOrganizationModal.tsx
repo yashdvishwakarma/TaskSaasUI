@@ -167,7 +167,7 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
   if (!organization) return null;
 
   const isFormValid = !Object.keys(errors).length && hasChanges;
-
+  console.log("Render EditOrganizationModal", { formData, errors, touched, hasChanges });
   return (
     <Dialog 
       open={open} 
@@ -280,8 +280,10 @@ const EditOrganizationModal: React.FC<EditOrganizationModalProps> = ({
           </Box>
 
           {/* Plan Selection */}
-          <Box>
+          <Box
+          >
             <TextField
+              disabled={true}
               fullWidth
               select
               label="Plan"

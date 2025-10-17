@@ -25,6 +25,7 @@ import {
   Select,
   MenuItem,
   colors,
+  CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -103,7 +104,7 @@ export default function UserManagementTab() {
         return;
       }
       
-      await userApi.registerUser(formData);
+      await userApi.createUser(formData);
       setSuccessMessage('User created successfully');
       setCreateDialogOpen(false);
       resetForm();
@@ -157,6 +158,14 @@ export default function UserManagementTab() {
   useEffect(() => {
     loadUsers();
   }, [page, rowsPerPage]);
+
+    if (loading) {
+      return (
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      );
+    }
 
   return (
     <Box>

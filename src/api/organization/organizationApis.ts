@@ -61,8 +61,8 @@ export const orgApi = {
     return response;
   },
 
-  async updateOrganization(id: string, data: UpdateOrganizationDto): Promise<void> {
-    await apiService.put(`/api/organizations/${id}`, data);
+  async updateOrganization(data: UpdateOrganizationDto): Promise<void> {
+    await apiService.put(`/organizations/updateorganization`, data);
   },
 
   async deleteOrganization(id: string): Promise<void> {

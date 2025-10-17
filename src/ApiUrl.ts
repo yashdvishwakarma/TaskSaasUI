@@ -15,7 +15,8 @@ const ApiUrls = {
 
   UserUrls: {
     GetProfile: "/user/me",
-    GetUserList:  "user/userlist"
+    GetUserList:  "user/userlist",
+    createUer : "auth/createuser"
   },
 
   ProfileUrls: {
