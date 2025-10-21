@@ -17,7 +17,12 @@ export default defineConfig(({ mode }) => ({
     postcss: './postcss.config.js',
   },
   optimizeDeps: {
-    include: ["recharts"],
+    include: ["recharts","html2canvas"],
+  },
+   build: {
+    commonjsOptions: {
+      include: [/html2canvas/, /node_modules/]
+    }
   },
   resolve: {
     alias: {
