@@ -11,6 +11,8 @@ export type TaskItem = {
   assigneeId?: number;
   createdAt?: string;
   updatedAt?: string;
+  priority?: number;
+  tags?: string[];
 };
 
 export const getTasks = () =>
@@ -25,6 +27,9 @@ export const createTask = (payload: {
   status: 0 | 1 | 2;
   owner: number;
   Role : "User" | "Admin";
+  organizationId?: number;
+  priority?: number;
+  tags?: string[];
 }) => http.post<TaskItem>(ApiUrls.TaskUrls.CreateTask, payload); 
 
 export const deleteTask = (payload: {

@@ -35,7 +35,7 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Profile() {
   const localUser = localStorage.getItem('user');
-  const parsedUser = localUser ? JSON.parse(localUser).data : null;
+  const parsedUser = localUser ? JSON.parse(localUser).data ? JSON.parse(localUser).data : JSON.parse(localUser) : null;
   const isAdmin = parsedUser?.role === AppConstants.UserRolesString.Admin;
   const [tabValue, setTabValue] = useState(0);
 

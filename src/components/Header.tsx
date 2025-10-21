@@ -13,11 +13,14 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Business, Logout, Person } from "@mui/icons-material";
+import { Business, Logout, Padding, Person } from "@mui/icons-material";
 import UserAvatar from "./UserAvtar";
 import { useState } from "react";
+import { useThemeMode as useTheme } from '../contexts/ThemeContext';
+import { DarkMode, LightMode } from '@mui/icons-material';
 
 export default function Header() {
+   const { toggleTheme, mode } = useTheme();
   const navigate = useNavigate();
   const user = localStorage.getItem("user");
   const userData = user ? JSON.parse(user).data : null;
@@ -84,11 +87,15 @@ export default function Header() {
             }}
             onClick={() => navigate("/charts")}
           >
-            Charts
+            Analytics
           </Typography>
         </div>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <IconButton onClick={toggleTheme} color="inherit">
+            {mode === "light" ? <DarkMode /> : <LightMode />}
+          </IconButton>
+
           <IconButton
             sx={{ border: "none" }}
             onClick={handleMenuOpen}

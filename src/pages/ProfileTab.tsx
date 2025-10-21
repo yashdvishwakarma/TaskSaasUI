@@ -86,7 +86,7 @@ import { User } from '../api/User/types';
 
 export default function ProfileTab() {
   const localUser = localStorage.getItem('user');
-  const parsedUser = localUser ? JSON.parse(localUser).data : null;
+  const parsedUser = localUser ? JSON.parse(localUser).data ? JSON.parse(localUser).data : JSON.parse(localUser) : null;
 
   // State management
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -130,6 +130,7 @@ export default function ProfileTab() {
   // Load profile
   const loadProfile = async () => {
     try {
+      
       setLoading(true);
       setError('');
       const response = await profileApi.getProfile(parsedUser?.id);
@@ -249,7 +250,9 @@ export default function ProfileTab() {
   };
 
   useEffect(() => {
+    
     if (parsedUser?.id) {
+      
       loadProfile();
     }
   }, [parsedUser?.id]);
