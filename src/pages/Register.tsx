@@ -34,19 +34,39 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // const submit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setLoading(true);
+  //   try {
+  //     await doRegister(fullName, email, password ,AppConstatns.UserRoles.Admin);
+  //     nav("/dashboard");
+  //   } catch (err) {
+  //     setError("Registration failed. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      await doRegister(fullName, email, password ,AppConstatns.UserRoles.Admin);
-      nav("/dashboard");
-    } catch (err) {
-      setError("Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+  try {
+    const response = await doRegister(fullName, email, password, AppConstatns.UserRoles.Admin);
+    
+    // Store user data in localStorage after successful registration
+    if (response != null) {
+      localStorage.setItem('user', JSON.stringify({ data: response }));
     }
-  };
+    
+    nav("/dashboard");
+  } catch (err) {
+    setError("Registration failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Box

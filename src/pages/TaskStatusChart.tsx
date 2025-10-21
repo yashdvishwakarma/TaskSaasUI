@@ -100,8 +100,6 @@ export default function TaskStatusChart() {
       }));
 
       setTasksByDate(chartData)
-
-        console.log("Tasks by date:", chartData);
       } else {
         setTasks([]);
       }

@@ -25,6 +25,8 @@ import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
+import TaskAnalytics from './components/Analytics/TaskAnalytics';
+import { CustomThemeProvider } from './contexts/ThemeContext'; 
 
 const queryClient = new QueryClient();
 
@@ -46,9 +48,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
+      <CustomThemeProvider> {/* Replaced ThemeProvider with CustomThemeProvider */}
         <TooltipProvider>
-          <CssBaseline />
+          {/* Removed CssBaseline as it's now in CustomThemeProvider */}
           <Toaster />
           <Sonner />
           <AppErrorBoundary>
@@ -77,7 +79,7 @@ function App() {
                   <ProtectedRoute>
                     <>
                       <Header />
-                      <TaskStatusChart />
+                      <TaskAnalytics />
                     </>
                   </ProtectedRoute>
                 }
@@ -129,7 +131,7 @@ function App() {
             </Routes>
           </AppErrorBoundary>
         </TooltipProvider>
-      </ThemeProvider>
+      </CustomThemeProvider>
     </QueryClientProvider>
   );
 }
