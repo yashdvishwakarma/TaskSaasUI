@@ -4,7 +4,7 @@ import { type ApiResponse, ApiException } from './types';
 import AuthService from './Services/AuthService'; // Fixed import path
 
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://localhost:7048/api",
+  baseURL: import.meta.env.VITE_API_URL || "https://tasksaas-api.onrender.com/api",
   timeout: import.meta.env.DEV ? 100000 : 1000000,
 });
 
