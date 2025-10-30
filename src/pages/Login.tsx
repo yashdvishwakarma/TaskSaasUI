@@ -1,9 +1,8 @@
-// src/pages/Login.tsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import {theme } from "../theme/theme";
- import {
+import { theme } from "../theme/theme";
+import {
   Box,
   Button,
   TextField,
@@ -12,7 +11,8 @@ import {theme } from "../theme/theme";
   InputAdornment,
   IconButton,
   CircularProgress,
-  Alert
+  Alert,
+  FormHelperText
 } from "@mui/material";
 import {
   Visibility,
@@ -29,10 +29,91 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Validation errors
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Validation functions
+  const validateEmail = (value: string) => {
+    if (!value) {
+      setEmailError("Email is required");
+      return false;
+    }
+    if (value.length > 100) {
+      setEmailError("Email must be less than 100 characters");
+      return false;
+    }
+    if (!emailRegex.test(value)) {
+      setEmailError("Please enter a valid email address");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const validatePassword = (value: string) => {
+    if (!value) {
+      setPasswordError("Password is required");
+      return false;
+    }
+    // if (value.length < 6) {
+    //   setPasswordError("Password must be at least 6 characters");
+    //   return false;
+    // }
+    if (value.length > 100) {
+      setPasswordError("Password must be less than 100 characters");
+      return false;
+    }
+    // Check for at least one number
+    // if (!/\d/.test(value)) {
+    //   setPasswordError("Password must contain at least one number");
+    //   return false;
+    // }
+    // Check for at least one letter
+    // if (!/[a-zA-Z]/.test(value)) {
+    //   setPasswordError("Password must contain at least one letter");
+    //   return false;
+    // }
+    setPasswordError("");
+    return true;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim(); // Remove whitespace
+    setEmail(value);
+    validateEmail(value);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    validatePassword(value);
+  };
+
+  const handleEmailBlur = () => {
+    validateEmail(email);
+  };
+
+  const handlePasswordBlur = () => {
+    validatePassword(password);
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    // Validate all fields
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+    
     setLoading(true);
     try {
       await doLogin(email, password);
@@ -47,7 +128,7 @@ export default function Login() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: "calc(100vh - 264px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -89,20 +170,29 @@ export default function Login() {
           </Alert>
         )}
 
-        <form onSubmit={submit}>
+        <form onSubmit={submit} noValidate>
           <TextField
             fullWidth
             label="Email address"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
+            onBlur={handleEmailBlur}
+            error={!!emailError}
+            helperText={emailError}
             sx={{ mb: 3 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Email sx={{ color: "grey.400" }} />
+                  <Email sx={{ color: emailError ? "error.main" : "grey.400" }} />
                 </InputAdornment>
               ),
+            }}
+            inputProps={{
+              maxLength: 100,
+              autoComplete: "email",
+              "aria-label": "Email address",
+              pattern: emailRegex.source,
             }}
             required
           />
@@ -112,12 +202,15 @@ export default function Login() {
             label="Password"
             type={showPassword ? "text" : "password"}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
+            onBlur={handlePasswordBlur}
+            error={!!passwordError}
+            helperText={passwordError}
             sx={{ mb: 4 }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Lock sx={{ color: "grey.400" }} />
+                  <Lock sx={{ color: passwordError ? "error.main" : "grey.400" }} />
                 </InputAdornment>
               ),
               endAdornment: (
@@ -125,11 +218,18 @@ export default function Login() {
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     edge="end"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
+            }}
+            inputProps={{
+              maxLength: 100,
+              autoComplete: "current-password",
+              "aria-label": "Password",
+              minLength: 6,
             }}
             required
           />
@@ -139,13 +239,17 @@ export default function Login() {
             type="submit"
             variant="contained"
             size="large"
-            disabled={loading}
+            disabled={loading || !!emailError || !!passwordError}
             sx={{
               mb: 3,
               py: 1.5,
               background: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)",
               "&:hover": {
                 background: "linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%)",
+              },
+              "&:disabled": {
+                background: "grey.300",
+                color: "grey.500",
               },
             }}
           >

@@ -14,12 +14,27 @@ export function useAuth() {
     setUser(data.data);
   };
 
-  const doRegister = async (fullName: string, email: string, password: string , Role : any) => {
-    const { data } = await register(fullName, email, password, Role);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data));
-    setUser(data);
-  };
+  // const doRegister = async (fullName: string, email: string, password: string , Role : any) => {
+  //   debugger
+  //   const { data } = await register(fullName, email, password, Role);
+  //   localStorage.setItem("token", data.token);
+  //   localStorage.setItem("user", JSON.stringify(data));
+  //   setUser(data);
+  // };
+
+  const doRegister = async (fullName: string, email: string, password: string, Role: any) => {
+    const response = await register(fullName, email, password, Role);
+    
+    // Only store token and user if registration was successful
+    if (response && response.data) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setUser(response.data);
+    }
+    
+    // Return the full response so the caller can handle errors
+    return response;
+}
 
   const logout = () => {
     localStorage.removeItem("token");
