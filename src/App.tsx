@@ -1,8 +1,5 @@
 // src/App.tsx
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { theme } from './theme/theme';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { Toaster } from "./components/ui/toaster";
@@ -11,33 +8,67 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Header from './components/Header';
-import TaskStatusChart from './pages/TaskStatusChart';
 import Profile from './pages/Profile';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import OrganizationManagement from './pages/Organization/OrganizationManagement';
 import AppConstants from './api/AppConstants';
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import TaskAnalytics from './components/Analytics/TaskAnalytics';
+import { CustomThemeProvider } from './contexts/ThemeContext'; 
+import Footer from './components/Footer';
 import "./index.css";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 // Add Google Font
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
-import TaskAnalytics from './components/Analytics/TaskAnalytics';
-import { CustomThemeProvider } from './contexts/ThemeContext'; 
 
 const queryClient = new QueryClient();
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
+// Layout for public pages WITH header and footer (login, register)
+const PublicLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
-// Protected Route component
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+// Layout for protected pages (dashboard, etc.)
+const ProtectedLayout = () => {
   const token = localStorage.getItem('token');
-  return token ? <>{children}</> : <Navigate to="/index" />;
+  
+  if (!token) {
+    return <Navigate to="/index" />;
+  }
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
+// Layout for pages with only footer (no header)
+const FooterOnlyLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 function App() {
@@ -48,86 +79,34 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CustomThemeProvider> {/* Replaced ThemeProvider with CustomThemeProvider */}
+      <CustomThemeProvider>
         <TooltipProvider>
-          {/* Removed CssBaseline as it's now in CustomThemeProvider */}
           <Toaster />
           <Sonner />
           <AppErrorBoundary>
             <Routes>
-              {/* Public Routes */}
-              <Route path="/index" element={<Index />} />
-
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              {/* Index page - no header, only footer */}
+              <Route element={<FooterOnlyLayout />}>
+                <Route path="/index" element={<Index />} />
+              </Route>
               
-              {/* Protected Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <>
-                      <Header />
-                      <Dashboard />
-                    </>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/charts"
-                element={
-                  <ProtectedRoute>
-                    <>
-                      <Header />
-                      <TaskAnalytics />
-                    </>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <>
-                      <Header />
-                      <Profile />
-                    </>
-                  </ProtectedRoute>
-                }
-              />
-              <Route  
-                path="/organizations"
-                element={
-                  <ProtectedRoute>
-                    <>
-                      <Header />
-                      <OrganizationManagement />
-                    </>
-                  </ProtectedRoute>
-                }
-              />
+              {/* Public routes with header and footer */}
+              <Route element={<PublicLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
               
-              {/* Index route from first component - you may want to protect this too */}
-              <Route 
-                path="/index" 
-                element={
-                  <ProtectedRoute>
-                    <>
-                      <Header />
-                      <Index />
-                    </>
-                  </ProtectedRoute>
-                } 
-              />
+              {/* Protected routes with header only */}
+              <Route element={<ProtectedLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/charts" element={<TaskAnalytics />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/organizations" element={<OrganizationManagement />} />
+              </Route>
               
               {/* Default redirect */}
-              <Route
-                path="/"  
-                element={<Navigate to={token ? "/dashboard" : "/index"} />}
-              />
-              
-              {/* 404 Not Found - must be last */}
-              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Navigate to={token ? "/dashboard" : "/index"} />} />
             </Routes>
           </AppErrorBoundary>
         </TooltipProvider>
