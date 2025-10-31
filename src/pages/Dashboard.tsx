@@ -128,7 +128,7 @@ export default function Dashboard() {
     open: false,
     task: null,
   });
-
+  const [validationError, setValidationError] = useState("");
   // New task dialog states - with proper default date
   const [newTaskData, setNewTaskData] = useState({
     title: "",
@@ -245,75 +245,139 @@ export default function Dashboard() {
       }
     });
 
-  const add = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
+const add = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Clear previous validation errors
+  setValidationError("");
+  
+  // Validation checks
+  if (!title.trim()) {
+    setValidationError("Task name cannot be empty");
+    return;
+  }
+  
+  if (title.length > 50) {
+    setValidationError("Task name must be less than 50 characters");
+    return;
+  }
+  
+  // Optional: Check for minimum length
+  if (title.trim().length < 3) {
+    setValidationError("Task name must be at least 3 characters long");
+    return;
+  }
+  
+  // Optional: Check for special characters or patterns
+  const invalidCharacters = /[<>]/g;
+  if (invalidCharacters.test(title)) {
+    setValidationError("Task name contains invalid characters");
+    return;
+  }
 
-    try {
-      await createTask({
-        title,
-        status: 0,
-        owner: user ? JSON.parse(user).id : null,
-        Role: "User",
-        organizationId: parsedUser?.organizationId ?? 0,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      });
-      setTitle("");
-      await loadTasks();
-    } catch (err) {
-      setError("Failed to create task");
-    }
-  };
+  try {
+    await createTask({
+      title: title.trim(), // Trim whitespace before saving
+      status: 0,
+      owner: user ? JSON.parse(user).id : null,
+      Role: "User",
+      organizationId: parsedUser?.organizationId ?? 0,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+    setTitle("");
+    setValidationError(""); // Clear any validation errors
+    await loadTasks();
+  } catch (err) {
+    setError("Failed to create task");
+  }
+};
+
+// Modified onChange handler with real-time validation
+const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  
+  // Allow typing but show warning if exceeding limit
+  if (value.length <= 50) {
+    setTitle(value);
+    setValidationError("");
+  } else {
+    // Optionally prevent typing beyond 50 characters
+    // setTitle(value.substring(0, 50));
+    setTitle(value);
+    setValidationError(`${value.length}/50 characters (exceeds limit)`);
+  }
+};
 
   // Add this state for dialog error
   const [dialogError, setDialogError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   // Update createAdvancedTask function
-  const createAdvancedTask = async () => {
-    try {
-      setDialogError(""); // Clear any previous errors
 
-      // Format the date properly
-      const formattedDate = newTaskData.dueDate
-        ? newTaskData.dueDate.toISOString() // ISO format for API
-        : "";
+const createAdvancedTask = async () => {
+  try {
+    setDialogError(""); // Clear any previous errors
 
-      await createTask({
-        title: newTaskData.title,
-        description: newTaskData.description,
-        status: 0,
-        priority: newTaskData.priority,
-        dueDate: formattedDate,
-        tags: newTaskData.tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter((t) => t),
-        owner: user ? JSON.parse(user).id : null,
-        Role: "User",
-        organizationId: parsedUser?.organizationId ?? 0,
+    // Validation checks
+    const titleError = validateTitle(newTaskData.title);
+    const descriptionError = validateDescription(newTaskData.description);
+    const tagsError = validateTags(newTaskData.tags);
+
+    // If there are validation errors, show them and return
+    if (titleError || descriptionError || tagsError) {
+      setValidationErrors({
+        title: titleError,
+        description: descriptionError,
+        tags: tagsError,
       });
-
-      setOpenNewTaskDialog(false);
-      // Reset with proper default date
-      setNewTaskData({
-        title: "",
-        description: "",
-        priority: 1,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        tags: "",
-      });
-
-      // Show success message
-      setError(""); // Clear any existing errors
-      setSuccessMessage("Task created successfully!");
-
-      await loadTasks();
-    } catch (err) {
-      // Show error in dialog instead of main page
-      setDialogError("Failed to create task. Please try again.");
+      setDialogError("Please fix the validation errors before submitting");
+      return;
     }
-  };
+
+    // Format the date properly
+    const formattedDate = newTaskData.dueDate
+      ? newTaskData.dueDate.toISOString() // ISO format for API
+      : "";
+
+    await createTask({
+      title: newTaskData.title.trim(), // Trim whitespace
+      description: newTaskData.description.trim(),
+      status: 0,
+      priority: newTaskData.priority,
+      dueDate: formattedDate,
+      tags: newTaskData.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t),
+      owner: user ? JSON.parse(user).id : null,
+      Role: "User",
+      organizationId: parsedUser?.organizationId ?? 0,
+    });
+
+    setOpenNewTaskDialog(false);
+    
+    // Reset with proper default date
+    setNewTaskData({
+      title: "",
+      description: "",
+      priority: 1,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      tags: "",
+    });
+
+    // Clear validation errors
+    setValidationErrors({ title: "", description: "", tags: "" });
+
+    // Show success message
+    setError(""); // Clear any existing errors
+    setSuccessMessage("Task created successfully!");
+
+    await loadTasks();
+  } catch (err) {
+    // Show error in dialog instead of main page
+    setDialogError("Failed to create task. Please try again.");
+  }
+};
 
   // Add auto-dismiss for success and error messages
   useEffect(() => {
@@ -479,6 +543,62 @@ const toggleStatus = async (task: TaskItem) => {
     setError("Failed to update task");
   }
 };
+
+// Add validation state
+const [validationErrors, setValidationErrors] = useState({
+  title: "",
+  description: "",
+  tags: "",
+});
+
+// Validation helper functions
+const validateTitle = (title: string): string => {
+  if (!title.trim()) return "Title is required";
+  if (title.trim().length < 3) return "Title must be at least 3 characters long";
+  if (title.length > 50) return "Title must be less than 50 characters";
+  const invalidCharacters = /[<>]/g;
+  if (invalidCharacters.test(title)) return "Title contains invalid characters";
+  return "";
+};
+
+const validateDescription = (description: string): string => {
+  if (description.length > 500) return "Description must be less than 500 characters";
+  return "";
+};
+
+const validateTags = (tags: string): string => {
+  if (tags.length > 100) return "Tags must be less than 100 characters total";
+  const tagArray = tags.split(',').filter(tag => tag.trim());
+  if (tagArray.length > 5) return "Maximum 5 tags allowed";
+  return "";
+};
+
+// Modified onChange handlers
+const handleTitleChangeAdvanced = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setNewTaskData({ ...newTaskData, title: value });
+  setValidationErrors({
+    ...validationErrors,
+    title: value.length > 50 ? `${value.length}/50 characters (exceeds limit)` : "",
+  });
+};
+
+const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setNewTaskData({ ...newTaskData, description: value });
+  setValidationErrors({
+    ...validationErrors,
+    description: value.length > 500 ? `${value.length}/500 characters (exceeds limit)` : "",
+  });
+};
+
+const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  setNewTaskData({ ...newTaskData, tags: value });
+  const error = validateTags(value);
+  setValidationErrors({ ...validationErrors, tags: error });
+};
+
 
   return (
     <Box
@@ -691,67 +811,87 @@ const toggleStatus = async (task: TaskItem) => {
           </Button>
         </Stack>
         {/* Add Task Form */}
-        <Paper
-          component="form"
-          onSubmit={add}
-          elevation={0}
-          sx={{
-            p: 2,
-            mb: 4,
-            border: "2px dashed",
-            borderColor: "grey.200",
-            borderRadius: 2,
-            backgroundColor: "grey.50",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              borderColor: "primary.light",
-              backgroundColor: "background.paper",
-            },
-          }}
-        >
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              fullWidth
-              placeholder="Add a new task..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              variant="standard"
-              sx={{
-                "& .MuiInput-underline:before": {
-                  borderBottom: "none",
-                },
-                "& .MuiInput-underline:hover:before": {
-                  borderBottom: "none",
-                },
-                "& .MuiInput-underline:after": {
-                  borderBottom: "none",
-                },
-                "& input": {
-                  fontSize: "1.1rem",
-                  fontWeight: 500,
-                },
-              }}
-              InputProps={{
-                startAdornment: <Add sx={{ color: "grey.400", mr: 2 }} />,
-              }}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={!title.trim()}
-              sx={{
-                minWidth: 100,
-                background: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)",
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%)",
-                },
-              }}
-            >
-              Add Task
-            </Button>
-          </Stack>
-        </Paper>
+    <Paper
+      component="form"
+      onSubmit={add}
+      elevation={0}
+      sx={{
+        p: 2,
+        mb: 4,
+        border: "2px dashed",
+        borderColor: validationError ? "error.main" : "grey.200",
+        borderRadius: 2,
+        backgroundColor: "grey.50",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          borderColor: validationError ? "error.main" : "primary.light",
+          backgroundColor: "background.paper",
+        },
+      }}
+    >
+      <Stack spacing={1}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <TextField
+            fullWidth
+            placeholder="Add a new task..."
+            value={title}
+            onChange={handleTitleChange}
+            error={!!validationError}
+            variant="standard"
+            sx={{
+              "& .MuiInput-underline:before": {
+                borderBottom: "none",
+              },
+              "& .MuiInput-underline:hover:before": {
+                borderBottom: "none",
+              },
+              "& .MuiInput-underline:after": {
+                borderBottom: "none",
+              },
+              "& input": {
+                fontSize: "1.1rem",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              startAdornment: <Add sx={{ color: "grey.400", mr: 2 }} />,
+            }}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={!title.trim() || title.length > 50}
+            sx={{
+              minWidth: 100,
+              background: "linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%)",
+              "&:hover": {
+                background:
+                  "linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%)",
+              },
+            }}
+          >
+            Add Task
+          </Button>
+        </Stack>
+        
+        {/* Character count and validation message */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1 }}>
+          <Typography 
+            variant="caption" 
+            color={validationError ? "error" : "text.secondary"}
+            sx={{ minHeight: '1.2em' }}
+          >
+            {validationError}
+          </Typography>
+          <Typography 
+            variant="caption" 
+            color={title.length > 50 ? "error" : "text.secondary"}
+          >
+            {title.length}/50 characters
+          </Typography>
+        </Box>
+      </Stack>
+    </Paper>
         {/* Error Alert */}
         {error && (
           <Alert
@@ -1270,139 +1410,164 @@ const toggleStatus = async (task: TaskItem) => {
           </Fade>
         )}
         {/* New Task Dialog */}
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Dialog
-            open={openNewTaskDialog}
-            onClose={() => {
-              setOpenNewTaskDialog(false);
-              setDialogError(""); // Clear error when closing
-            }}
-            maxWidth="sm"
-            fullWidth
-          >
-            <DialogTitle>Create New Task</DialogTitle>
-            <DialogContent>
-              <Stack spacing={3} sx={{ mt: 2 }}>
-                {/* Show error in dialog */}
-                {dialogError && (
-                  <Alert
-                    severity="error"
-                    onClose={() => setDialogError("")}
-                    sx={{ mb: 2 }}
-                  >
-                    {dialogError}
-                  </Alert>
-                )}
+ <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <Dialog
+      open={openNewTaskDialog}
+      onClose={() => {
+        setOpenNewTaskDialog(false);
+        setDialogError("");
+        setValidationErrors({ title: "", description: "", tags: "" }); // Clear all validation errors
+      }}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle>Create New Task</DialogTitle>
+      <DialogContent>
+        <Stack spacing={3} sx={{ mt: 2 }}>
+          {/* Show error in dialog */}
+          {dialogError && (
+            <Alert
+              severity="error"
+              onClose={() => setDialogError("")}
+              sx={{ mb: 2 }}
+            >
+              {dialogError}
+            </Alert>
+          )}
 
-                <TextField
-                  label="Title"
-                  fullWidth
-                  value={newTaskData.title}
-                  onChange={(e) =>
-                    setNewTaskData({ ...newTaskData, title: e.target.value })
-                  }
-                  required
-                  error={dialogError !== "" && !newTaskData.title.trim()}
-                  helperText={
-                    dialogError && !newTaskData.title.trim()
-                      ? "Title is required"
-                      : ""
-                  }
-                />
-                <TextField
-                  label="Description"
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={newTaskData.description}
-                  onChange={(e) =>
-                    setNewTaskData({
-                      ...newTaskData,
-                      description: e.target.value,
-                    })
-                  }
-                />
-                <FormControl>
-                  <Typography variant="subtitle2" gutterBottom>
-                    Priority
-                  </Typography>
-                  <RadioGroup
-                    row
-                    value={newTaskData.priority}
-                    onChange={(e) =>
-                      setNewTaskData({
-                        ...newTaskData,
-                        priority: parseInt(e.target.value),
-                      })
-                    }
-                  >
-                    <FormControlLabel
-                      value={0}
-                      control={<Radio />}
-                      label="Low"
-                    />
-                    <FormControlLabel
-                      value={1}
-                      control={<Radio />}
-                      label="Medium"
-                    />
-                    <FormControlLabel
-                      value={2}
-                      control={<Radio />}
-                      label="High"
-                    />
-                  </RadioGroup>
-                </FormControl>
-                <DatePicker
-                  label="Due Date"
-                  value={newTaskData.dueDate}
-                  onChange={(newDate) =>
-                    setNewTaskData({
-                      ...newTaskData,
-                      dueDate:
-                        newDate ||
-                        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                    })
-                  }
-                  minDate={new Date()} // Prevent selecting past dates
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      margin: "normal",
-                      required: true,
-                    },
-                  }}
-                />
-                <TextField
-                  label="Tags (comma-separated)"
-                  fullWidth
-                  value={newTaskData.tags}
-                  onChange={(e) =>
-                    setNewTaskData({ ...newTaskData, tags: e.target.value })
-                  }
-                  placeholder="e.g., urgent, work, personal"
-                />
-              </Stack>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setOpenNewTaskDialog(false);
-                  setDialogError(""); // Clear error when canceling
-                }}
+          {/* Title Field */}
+          <Box>
+            <TextField
+              label="Title"
+              fullWidth
+              value={newTaskData.title}
+              onChange={handleTitleChangeAdvanced}
+              required
+              error={!!validationErrors.title || (dialogError !== "" && !newTaskData.title.trim())}
+              helperText={
+                validationErrors.title ||
+                (dialogError && !newTaskData.title.trim() ? "Title is required" : "")
+              }
+            />
+            <Typography
+              variant="caption"
+              color={newTaskData.title.length > 50 ? "error" : "text.secondary"}
+              sx={{ mt: 0.5, display: "block", textAlign: "right" }}
+            >
+              {newTaskData.title.length}/50 characters
+            </Typography>
+          </Box>
+
+          {/* Description Field */}
+          <Box>
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              rows={3}
+              value={newTaskData.description}
+              onChange={handleDescriptionChange}
+              error={!!validationErrors.description}
+              helperText={validationErrors.description}
+            />
+            <Typography
+              variant="caption"
+              color={newTaskData.description.length > 500 ? "error" : "text.secondary"}
+              sx={{ mt: 0.5, display: "block", textAlign: "right" }}
+            >
+              {newTaskData.description.length}/500 characters
+            </Typography>
+          </Box>
+
+          {/* Priority Field */}
+          <FormControl>
+            <Typography variant="subtitle2" gutterBottom>
+              Priority
+            </Typography>
+            <RadioGroup
+              row
+              value={newTaskData.priority}
+              onChange={(e) =>
+                setNewTaskData({
+                  ...newTaskData,
+                  priority: parseInt(e.target.value),
+                })
+              }
+            >
+              <FormControlLabel value={0} control={<Radio />} label="Low" />
+              <FormControlLabel value={1} control={<Radio />} label="Medium" />
+              <FormControlLabel value={2} control={<Radio />} label="High" />
+            </RadioGroup>
+          </FormControl>
+
+          {/* Due Date Field */}
+          <DatePicker
+            label="Due Date"
+            value={newTaskData.dueDate}
+            onChange={(newDate) =>
+              setNewTaskData({
+                ...newTaskData,
+                dueDate: newDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              })
+            }
+            minDate={new Date()} // Prevent selecting past dates
+            slotProps={{
+              textField: {
+                fullWidth: true,
+                margin: "normal",
+                required: true,
+              },
+            }}
+          />
+
+          {/* Tags Field */}
+          <Box>
+            <TextField
+              label="Tags (comma-separated)"
+              fullWidth
+              value={newTaskData.tags}
+              onChange={handleTagsChange}
+              placeholder="e.g., urgent, work, personal"
+              error={!!validationErrors.tags}
+              helperText={validationErrors.tags || "Maximum 5 tags, separated by commas"}
+            />
+            {newTaskData.tags && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5, display: "block" }}
               >
-                Cancel
-              </Button>
-              <Button
-                onClick={createAdvancedTask}
-                variant="contained"
-                disabled={!newTaskData.title.trim()}
-              >
-                Create Task
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </LocalizationProvider>
+                {newTaskData.tags.split(',').filter(tag => tag.trim()).length} tag(s)
+              </Typography>
+            )}
+          </Box>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={() => {
+            setOpenNewTaskDialog(false);
+            setDialogError("");
+            setValidationErrors({ title: "", description: "", tags: "" });
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={createAdvancedTask}
+          variant="contained"
+          disabled={
+            !newTaskData.title.trim() ||
+            newTaskData.title.length > 50 ||
+            newTaskData.description.length > 500 ||
+            !!validationErrors.tags
+          }
+        >
+          Create Task
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </LocalizationProvider>
         {/* Filter Dialog */}
         <Dialog
           open={openFilterDialog}

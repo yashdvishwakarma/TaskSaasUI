@@ -27,7 +27,7 @@ export function useAuth() {
     
     // Only store token and user if registration was successful
     if (response && response.data) {
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
     }
