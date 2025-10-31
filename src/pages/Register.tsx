@@ -213,10 +213,12 @@ export default function Register() {
     setLoading(true);
     
     try {
+      
       const response: any = await doRegister(fullName, email, password, AppConstatns.UserRoles.Admin);
+      
       if (response?.data?.isSuccess && response?.data) {
         // Success case - manually store data
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.data.token);
         localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
         nav("/dashboard");
